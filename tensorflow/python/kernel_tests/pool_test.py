@@ -24,6 +24,7 @@ import numpy as np
 
 from tensorflow.python.framework import constant_op
 from tensorflow.python.framework import dtypes
+from tensorflow.python.framework import test_util
 from tensorflow.python.ops import gradient_checker
 from tensorflow.python.ops import nn_ops
 import tensorflow.python.ops.nn_grad  # pylint: disable=unused-import
@@ -151,7 +152,7 @@ class PoolingTest(test.TestCase):
         np.prod(input_shape), dtype=np.float32).reshape(input_shape) - 1
     y1 = pool_direct(input=x, **kwargs)
     y2 = nn_ops.pool(input=x, **kwargs)
-    self.assertAllClose(y1, y2.eval(), rtol=1e-2, atol=1e-2)
+    self.assertAllClose(y1, self.evaluate(y2), rtol=1e-2, atol=1e-2)
 
   def testPoolSimple(self):
     with self.session(use_gpu=test.is_gpu_available()):
@@ -218,6 +219,8 @@ class PoolingTest(test.TestCase):
                     strides=strides)
 
   def testPool3D(self):
+    if test.is_built_with_rocm():
+      self.skipTest("Pooling with 3D tensors is not supported in ROCm")
     with self.session(use_gpu=test.is_gpu_available()):
       for padding in ["SAME", "VALID"]:
         for pooling_type in ["MAX", "AVG"]:
@@ -273,6 +276,9 @@ class PoolingTest(test.TestCase):
               strides=[1, 2],
               dilation_rate=[1, 1],
               data_format="NCHW")
+          if test.is_built_with_rocm():
+            # Pooling with 3D tensors is not supported in ROCm
+            continue
           self._test(
               input_shape=[2, 2, 7, 5, 3],
               window_shape=[2, 2, 2],
@@ -301,6 +307,7 @@ class PoolingTest(test.TestCase):
     err_tolerance = 1e-2
     self.assertLess(err, err_tolerance)
 
+  @test_util.run_deprecated_v1
   def testGradient1D(self):
     with self.session(use_gpu=test.is_gpu_available()):
       for padding in ["SAME", "VALID"]:
@@ -327,6 +334,7 @@ class PoolingTest(test.TestCase):
                     dilation_rate=[1],
                     strides=strides)
 
+  @test_util.run_deprecated_v1
   def testGradient2D(self):
     with self.session(use_gpu=test.is_gpu_available()):
       for padding in ["SAME", "VALID"]:
@@ -353,7 +361,10 @@ class PoolingTest(test.TestCase):
                     dilation_rate=[1, 1],
                     strides=strides)
 
+  @test_util.run_deprecated_v1
   def testGradient3D(self):
+    if test.is_built_with_rocm():
+      self.skipTest("Pooling with 3D tensors is not supported in ROCm")
     with self.session(use_gpu=test.is_gpu_available()):
       for padding in ["SAME", "VALID"]:
         for pooling_type in ["AVG", "MAX"]:

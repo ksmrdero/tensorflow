@@ -41,12 +41,12 @@ class OneHotTest(test.TestCase):
       else:
         ans = array_ops.one_hot(**inputs)
         if expected_err_re is None:
-          tf_ans = ans.eval()
+          tf_ans = self.evaluate(ans)
           self.assertAllEqual(tf_ans, truth)
           self.assertEqual(tf_ans.shape, ans.get_shape())
         else:
           with self.assertRaisesOpError(expected_err_re):
-            ans.eval()
+            self.evaluate(ans)
 
   def _testBothOneHot(self, truth, expected_err_re=None, raises=None, **inputs):
     self._testOneHot(truth, True, expected_err_re, raises, **inputs)
@@ -419,6 +419,13 @@ class OneHotTest(test.TestCase):
         dtype=dtype,
         truth=None,
         raises=TypeError)
+
+  def testOneHotUint8WithLargeArray(self):
+    with self.cached_session(use_gpu=False) as sess:
+      matrix = np.random.rand(256) * 10
+      tensor = constant_op.constant(matrix, dtypes.uint8, shape=matrix.shape)
+      tensor_one_hot = array_ops.one_hot(tensor, depth=10, axis=0)
+      self.assertEqual(sess.run(tensor_one_hot).shape, (10, 256))
 
 
 if __name__ == "__main__":

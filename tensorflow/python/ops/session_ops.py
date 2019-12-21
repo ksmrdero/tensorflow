@@ -13,11 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Tensor Handle Operations.
-
-See the [Session Ops](https://tensorflow.org/api_guides/python/session_ops)
-guide.
-"""
+"""Tensor Handle Operations."""
 
 # pylint: disable=g-bad-name
 from __future__ import absolute_import
@@ -166,10 +162,10 @@ def get_session_handle(data, name=None):
 
   ```python
   c = tf.multiply(a, b)
-  h = tf.get_session_handle(c)
+  h = tf.compat.v1.get_session_handle(c)
   h = sess.run(h)
 
-  p, a = tf.get_session_tensor(h.handle, tf.float32)
+  p, a = tf.compat.v1.get_session_tensor(h.handle, tf.float32)
   b = tf.multiply(a, 10)
   c = sess.run(b, feed_dict={p: h.handle})
   ```
@@ -207,10 +203,10 @@ def get_session_tensor(handle, dtype, name=None):
 
   ```python
   c = tf.multiply(a, b)
-  h = tf.get_session_handle(c)
+  h = tf.compat.v1.get_session_handle(c)
   h = sess.run(h)
 
-  p, a = tf.get_session_tensor(h.handle, tf.float32)
+  p, a = tf.compat.v1.get_session_tensor(h.handle, tf.float32)
   b = tf.multiply(a, 10)
   c = sess.run(b, feed_dict={p: h.handle})
   ```
